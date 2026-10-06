@@ -1,0 +1,769 @@
+{
+  "datasets": [
+    {
+      "name": "top_circuits",
+      "displayName": "Top Circuits",
+      "queryLines": [
+        "SELECT\n",
+        "  circuit_name,\n",
+        "  total_races,\n",
+        "  total_points\n",
+        "FROM\n",
+        "  f1_catalog.gold.circuit_performance\n",
+        "ORDER BY\n",
+        "  total_races DESC\n",
+        "LIMIT 15"
+      ]
+    },
+    {
+      "name": "top_constructors",
+      "displayName": "Top Constructors",
+      "queryLines": [
+        "SELECT\n",
+        "  constructor_name,\n",
+        "  race_wins,\n",
+        "  podiums,\n",
+        "  total_points,\n",
+        "  races,\n",
+        "  ROUND((race_wins / races) * 100, 2) AS win_pct\n",
+        "FROM\n",
+        "  f1_catalog.gold.constructor_performance\n",
+        "ORDER BY\n",
+        "  race_wins DESC\n",
+        "LIMIT 15"
+      ]
+    },
+    {
+      "name": "top_drivers",
+      "displayName": "Top Drivers",
+      "queryLines": [
+        "SELECT\n",
+        "  driver_name,\n",
+        "  race_wins,\n",
+        "  podiums,\n",
+        "  total_points,\n",
+        "  races,\n",
+        "  ROUND((race_wins / races) * 100, 2) AS win_pct\n",
+        "FROM\n",
+        "  f1_catalog.gold.driver_performance\n",
+        "ORDER BY\n",
+        "  race_wins DESC\n",
+        "LIMIT 20"
+      ]
+    },
+    {
+      "name": "season_trends",
+      "displayName": "Season Trends",
+      "queryLines": [
+        "SELECT\n",
+        "  season,\n",
+        "  total_races,\n",
+        "  total_drivers,\n",
+        "  total_constructors,\n",
+        "  total_points\n",
+        "FROM\n",
+        "  f1_catalog.gold.season_summary\n",
+        "ORDER BY\n",
+        "  season"
+      ]
+    },
+    {
+      "name": "dq_summary",
+      "displayName": "Data Quality Summary",
+      "queryLines": [
+        "SELECT\n",
+        "  check_status,\n",
+        "  COUNT(*) AS check_count\n",
+        "FROM\n",
+        "  f1_catalog.gold.data_quality_audit\n",
+        "GROUP BY\n",
+        "  check_status"
+      ]
+    },
+    {
+      "name": "pipeline_overview",
+      "displayName": "Pipeline Overview",
+      "queryLines": [
+        "SELECT\n",
+        "  layer,\n",
+        "  table_name,\n",
+        "  row_count,\n",
+        "  last_updated\n",
+        "FROM\n",
+        "  f1_catalog.gold.pipeline_metadata\n",
+        "ORDER BY\n",
+        "  layer,\n",
+        "  table_name"
+      ]
+    },
+    {
+      "name": "f1_drivers",
+      "displayName": "F1 Top Drivers",
+      "queryLines": [
+        "SELECT\n",
+        "  driver_name,\n",
+        "  race_wins,\n",
+        "  podiums,\n",
+        "  total_points,\n",
+        "  races,\n",
+        "  ROUND((race_wins / races) * 100, 2) AS win_pct\n",
+        "FROM\n",
+        "  f1_catalog.gold.driver_performance\n",
+        "ORDER BY\n",
+        "  race_wins DESC\n",
+        "LIMIT 20"
+      ]
+    },
+    {
+      "name": "test_ds",
+      "displayName": "Test Dataset",
+      "queryLines": [
+        "SELECT\n",
+        "  1 AS val"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "15359766",
+      "displayName": "Page 1",
+      "layout": [
+        {
+          "widget": {
+            "name": "pipeline_overview_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "pipeline_overview",
+                  "fields": [
+                    {
+                      "name": "layer",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "name": "table_name",
+                      "expression": "`table_name`"
+                    },
+                    {
+                      "name": "row_count",
+                      "expression": "`row_count`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Pipeline Overview",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "layer"
+                  },
+                  {
+                    "fieldName": "table_name"
+                  },
+                  {
+                    "fieldName": "row_count"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "top_drivers_wins",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top_drivers",
+                  "fields": [
+                    {
+                      "name": "driver_name",
+                      "expression": "`driver_name`"
+                    },
+                    {
+                      "name": "sum(race_wins)",
+                      "expression": "SUM(`race_wins`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top Drivers by Wins"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "driver_name",
+                  "displayName": "driver_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(race_wins)",
+                  "displayName": "race_wins",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "driver_name",
+                  "displayName": "driver_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "top_constructors_wins",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top_constructors",
+                  "fields": [
+                    {
+                      "name": "constructor_name",
+                      "expression": "`constructor_name`"
+                    },
+                    {
+                      "name": "sum(race_wins)",
+                      "expression": "SUM(`race_wins`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top Constructors by Wins"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(race_wins)",
+                  "displayName": "race_wins",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 4,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "top_circuits_races",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top_circuits",
+                  "fields": [
+                    {
+                      "name": "circuit_name",
+                      "expression": "`circuit_name`"
+                    },
+                    {
+                      "name": "sum(total_races)",
+                      "expression": "SUM(`total_races`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top Circuits by Races"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "circuit_name",
+                  "displayName": "circuit_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_races)",
+                  "displayName": "total_races",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "circuit_name",
+                  "displayName": "circuit_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "dq_summary",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dq_summary",
+                  "fields": [
+                    {
+                      "name": "check_status",
+                      "expression": "`check_status`"
+                    },
+                    {
+                      "name": "sum(check_count)",
+                      "expression": "SUM(`check_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Data Quality Summary"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "check_status",
+                  "displayName": "check_status",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(check_count)",
+                  "displayName": "check_count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "check_status",
+                  "displayName": "check_status",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "top_drivers_points",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top_drivers",
+                  "fields": [
+                    {
+                      "name": "driver_name",
+                      "expression": "`driver_name`"
+                    },
+                    {
+                      "name": "sum(total_points)",
+                      "expression": "SUM(`total_points`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top Drivers by Points"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "driver_name",
+                  "displayName": "driver_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_points)",
+                  "displayName": "total_points",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "driver_name",
+                  "displayName": "driver_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "top_constructors_points",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top_constructors",
+                  "fields": [
+                    {
+                      "name": "constructor_name",
+                      "expression": "`constructor_name`"
+                    },
+                    {
+                      "name": "sum(total_points)",
+                      "expression": "SUM(`total_points`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top Constructors by Points"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_points)",
+                  "displayName": "total_points",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 12,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "season_trends_races",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "season_trends",
+                  "fields": [
+                    {
+                      "name": "season",
+                      "expression": "`season`"
+                    },
+                    {
+                      "name": "sum(total_races)",
+                      "expression": "SUM(`total_races`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Season Trends — Total Races"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "season",
+                  "displayName": "season",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_races)",
+                  "displayName": "total_races",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "season",
+                  "displayName": "season",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 16,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "season_trends_points",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "season_trends",
+                  "fields": [
+                    {
+                      "name": "season",
+                      "expression": "`season`"
+                    },
+                    {
+                      "name": "sum(total_points)",
+                      "expression": "SUM(`total_points`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Season Trends — Total Points"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "season",
+                  "displayName": "season",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_points)",
+                  "displayName": "total_points",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "season",
+                  "displayName": "season",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 16,
+            "width": 6,
+            "height": 4
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "252b77f4",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "layer_filter",
+            "queries": [
+              {
+                "name": "dashboards/01f1c147c4211a5fb21159e4c3c7f49f/datasets/01f1c1493adf12ad8490e4503edaa168_layer",
+                "query": {
+                  "datasetName": "pipeline_overview",
+                  "fields": [
+                    {
+                      "name": "layer",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "name": "layer_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Layer"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "layer",
+                    "queryName": "dashboards/01f1c147c4211a5fb21159e4c3c7f49f/datasets/01f1c1493adf12ad8490e4503edaa168_layer"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
