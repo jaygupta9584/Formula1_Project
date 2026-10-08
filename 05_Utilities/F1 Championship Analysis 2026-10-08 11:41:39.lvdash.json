@@ -1,0 +1,1711 @@
+{
+  "datasets": [
+    {
+      "name": "f1_seasons_mv",
+      "displayName": "F1 Season Summary",
+      "config": {
+        "source": "f1_catalog.gold.season_summary",
+        "measures": [
+          {
+            "name": "total_races",
+            "expr": "SUM(total_races)"
+          },
+          {
+            "name": "total_drivers",
+            "expr": "SUM(total_drivers)"
+          },
+          {
+            "name": "total_constructors",
+            "expr": "SUM(total_constructors)"
+          },
+          {
+            "name": "total_points",
+            "expr": "SUM(total_points)"
+          },
+          {
+            "name": "total_wins",
+            "expr": "SUM(total_wins)"
+          }
+        ],
+        "version": "1.1",
+        "comment": "Per-season championship summary from the gold layer",
+        "dimensions": [
+          {
+            "name": "season",
+            "expr": "season"
+          }
+        ]
+      }
+    },
+    {
+      "name": "f1_drivers_mv",
+      "displayName": "F1 Driver Performance",
+      "config": {
+        "source": "f1_catalog.gold.driver_performance",
+        "measures": [
+          {
+            "name": "total_points",
+            "expr": "SUM(total_points)"
+          },
+          {
+            "name": "race_wins",
+            "expr": "SUM(race_wins)"
+          },
+          {
+            "name": "podiums",
+            "expr": "SUM(podiums)"
+          },
+          {
+            "name": "races",
+            "expr": "SUM(races)"
+          },
+          {
+            "name": "avg_finish_position",
+            "expr": "AVG(avg_finish_position)"
+          },
+          {
+            "name": "avg_grid_position",
+            "expr": "AVG(avg_grid_position)"
+          }
+        ],
+        "version": "1.1",
+        "comment": "Career performance metrics per F1 driver from the gold layer",
+        "dimensions": [
+          {
+            "name": "driver_name",
+            "expr": "driver_name"
+          },
+          {
+            "name": "driver_rank",
+            "expr": "driver_rank"
+          }
+        ]
+      }
+    },
+    {
+      "name": "f1_constructors_mv",
+      "displayName": "F1 Constructor Performance",
+      "config": {
+        "source": "f1_catalog.gold.constructor_performance",
+        "measures": [
+          {
+            "name": "total_points",
+            "expr": "SUM(total_points)"
+          },
+          {
+            "name": "race_wins",
+            "expr": "SUM(race_wins)"
+          },
+          {
+            "name": "podiums",
+            "expr": "SUM(podiums)"
+          },
+          {
+            "name": "races",
+            "expr": "SUM(races)"
+          },
+          {
+            "name": "avg_finish_position",
+            "expr": "AVG(avg_finish_position)"
+          }
+        ],
+        "version": "1.1",
+        "comment": "Career performance metrics per F1 constructor from the gold layer",
+        "dimensions": [
+          {
+            "name": "constructor_name",
+            "expr": "constructor_name"
+          },
+          {
+            "name": "constructor_rank",
+            "expr": "constructor_rank"
+          }
+        ]
+      }
+    },
+    {
+      "name": "f1_circuits_mv",
+      "displayName": "F1 Circuit Performance",
+      "config": {
+        "source": "SELECT *, ROW_NUMBER() OVER (ORDER BY total_races DESC) AS circuit_rank FROM f1_catalog.gold.circuit_performance\n",
+        "measures": [
+          {
+            "name": "total_races",
+            "expr": "SUM(total_races)"
+          },
+          {
+            "name": "total_wins",
+            "expr": "SUM(total_wins)"
+          },
+          {
+            "name": "total_points",
+            "expr": "SUM(total_points)"
+          },
+          {
+            "name": "avg_finish_position",
+            "expr": "AVG(avg_finish_position)"
+          }
+        ],
+        "version": "1.1",
+        "comment": "Historical performance metrics per F1 circuit from the gold layer, ranked by races hosted",
+        "dimensions": [
+          {
+            "name": "circuit_name",
+            "expr": "circuit_name"
+          },
+          {
+            "name": "circuit_rank",
+            "expr": "circuit_rank"
+          }
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "name": "19ca0b25",
+      "displayName": "Championship Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "top_drivers_wins_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_drivers_mv",
+                  "fields": [
+                    {
+                      "name": "driver_name",
+                      "expression": "`driver_name`"
+                    },
+                    {
+                      "name": "measure(race_wins)",
+                      "expression": "MEASURE(`race_wins`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "driver_rank <= 10"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`race_wins`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 10 Drivers by Wins",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "driver_name",
+                  "displayName": "driver_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "measure(race_wins)"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(race_wins)",
+                  "displayName": "race_wins",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "driver_name",
+                  "displayName": "driver_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "seasons_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_seasons_mv",
+                  "fields": [
+                    {
+                      "name": "count(season)",
+                      "expression": "COUNT(`season`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Seasons",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(season)",
+                  "rowNumber": 0,
+                  "displayName": "Season Count"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "top_constructors_wins_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_constructors_mv",
+                  "fields": [
+                    {
+                      "name": "constructor_name",
+                      "expression": "`constructor_name`"
+                    },
+                    {
+                      "name": "measure(race_wins)",
+                      "expression": "MEASURE(`race_wins`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "constructor_rank <= 10"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`race_wins`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 10 Constructors by Wins",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "measure(race_wins)"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(race_wins)",
+                  "displayName": "race_wins",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 7,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "total_races_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_seasons_mv",
+                  "fields": [
+                    {
+                      "name": "measure(total_races)",
+                      "expression": "MEASURE(`total_races`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Total Races",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(total_races)",
+                  "rowNumber": 0,
+                  "displayName": "Race Count"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "drivers_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_drivers_mv",
+                  "fields": [
+                    {
+                      "name": "countdistinct(driver_name)",
+                      "expression": "COUNT(DISTINCT `driver_name`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Drivers"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(driver_name)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "constructors_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_constructors_mv",
+                  "fields": [
+                    {
+                      "name": "countdistinct(constructor_name)",
+                      "expression": "COUNT(DISTINCT `constructor_name`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Constructors"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(constructor_name)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "races_per_season_line",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_seasons_mv",
+                  "fields": [
+                    {
+                      "name": "season",
+                      "expression": "`season`"
+                    },
+                    {
+                      "name": "measure(total_races)",
+                      "expression": "MEASURE(`total_races`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Races per Season",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "season",
+                  "displayName": "season",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_races)",
+                  "displayName": "Races",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "season",
+                  "displayName": "season",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "points_per_season_line",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_seasons_mv",
+                  "fields": [
+                    {
+                      "name": "season",
+                      "expression": "`season`"
+                    },
+                    {
+                      "name": "measure(total_points)",
+                      "expression": "MEASURE(`total_points`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Championship Points per Season"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "season",
+                  "displayName": "season",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_points)",
+                  "displayName": "total_points",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "season",
+                  "displayName": "season",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "driver_analysis",
+      "displayName": "Driver Analysis",
+      "layout": [
+        {
+          "widget": {
+            "name": "da_wins_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_drivers_mv",
+                  "fields": [
+                    {
+                      "name": "driver_name",
+                      "expression": "`driver_name`"
+                    },
+                    {
+                      "name": "measure(race_wins)",
+                      "expression": "MEASURE(`race_wins`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "driver_rank <= 10"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`race_wins`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 10 Drivers by Wins",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "driver_name",
+                  "displayName": "driver_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "measure(race_wins)"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(race_wins)",
+                  "displayName": "race_wins",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "driver_name",
+                  "displayName": "driver_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "da_podiums_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_drivers_mv",
+                  "fields": [
+                    {
+                      "name": "driver_name",
+                      "expression": "`driver_name`"
+                    },
+                    {
+                      "name": "measure(podiums)",
+                      "expression": "MEASURE(`podiums`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "driver_rank <= 10"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`podiums`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 10 Drivers by Podiums",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "driver_name",
+                  "displayName": "driver_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "measure(podiums)"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(podiums)",
+                  "displayName": "podiums",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "driver_name",
+                  "displayName": "driver_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "da_drivers_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_drivers_mv",
+                  "fields": [
+                    {
+                      "name": "driver_rank",
+                      "expression": "`driver_rank`"
+                    },
+                    {
+                      "name": "driver_name",
+                      "expression": "`driver_name`"
+                    },
+                    {
+                      "name": "measure(races)",
+                      "expression": "MEASURE(`races`)"
+                    },
+                    {
+                      "name": "measure(race_wins)",
+                      "expression": "MEASURE(`race_wins`)"
+                    },
+                    {
+                      "name": "measure(podiums)",
+                      "expression": "MEASURE(`podiums`)"
+                    },
+                    {
+                      "name": "measure(total_points)",
+                      "expression": "MEASURE(`total_points`)"
+                    },
+                    {
+                      "name": "measure(avg_finish_position)",
+                      "expression": "MEASURE(`avg_finish_position`)"
+                    },
+                    {
+                      "name": "measure(avg_grid_position)",
+                      "expression": "MEASURE(`avg_grid_position`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "driver_rank <= 20"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "`driver_rank`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 20 Drivers",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "driver_rank"
+                  },
+                  {
+                    "fieldName": "driver_name"
+                  },
+                  {
+                    "fieldName": "measure(races)"
+                  },
+                  {
+                    "fieldName": "measure(race_wins)"
+                  },
+                  {
+                    "fieldName": "measure(podiums)"
+                  },
+                  {
+                    "fieldName": "measure(total_points)"
+                  },
+                  {
+                    "fieldName": "measure(avg_finish_position)"
+                  },
+                  {
+                    "fieldName": "measure(avg_grid_position)"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column",
+                    "field": {
+                      "index": 0
+                    }
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "da_grid_finish_scatter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_drivers_mv",
+                  "fields": [
+                    {
+                      "name": "driver_name",
+                      "expression": "`driver_name`"
+                    },
+                    {
+                      "name": "measure(avg_grid_position)",
+                      "expression": "MEASURE(`avg_grid_position`)"
+                    },
+                    {
+                      "name": "measure(avg_finish_position)",
+                      "expression": "MEASURE(`avg_finish_position`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "driver_rank <= 20"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Grid vs Finish Position (Top 20 Drivers)",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "measure(avg_grid_position)",
+                  "displayName": "avg_grid_position",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(avg_finish_position)",
+                  "displayName": "avg_finish_position",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "driver_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "constructor_analysis",
+      "displayName": "Constructor Analysis",
+      "layout": [
+        {
+          "widget": {
+            "name": "ca_wins_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_constructors_mv",
+                  "fields": [
+                    {
+                      "name": "constructor_name",
+                      "expression": "`constructor_name`"
+                    },
+                    {
+                      "name": "measure(race_wins)",
+                      "expression": "MEASURE(`race_wins`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "constructor_rank <= 10"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`race_wins`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 10 Constructors by Wins",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "measure(race_wins)"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(race_wins)",
+                  "displayName": "race_wins",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "ca_podiums_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_constructors_mv",
+                  "fields": [
+                    {
+                      "name": "constructor_name",
+                      "expression": "`constructor_name`"
+                    },
+                    {
+                      "name": "measure(podiums)",
+                      "expression": "MEASURE(`podiums`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "constructor_rank <= 10"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`podiums`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 10 Constructors by Podiums",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "measure(podiums)"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(podiums)",
+                  "displayName": "podiums",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "ca_constructors_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_constructors_mv",
+                  "fields": [
+                    {
+                      "name": "constructor_rank",
+                      "expression": "`constructor_rank`"
+                    },
+                    {
+                      "name": "constructor_name",
+                      "expression": "`constructor_name`"
+                    },
+                    {
+                      "name": "measure(races)",
+                      "expression": "MEASURE(`races`)"
+                    },
+                    {
+                      "name": "measure(race_wins)",
+                      "expression": "MEASURE(`race_wins`)"
+                    },
+                    {
+                      "name": "measure(podiums)",
+                      "expression": "MEASURE(`podiums`)"
+                    },
+                    {
+                      "name": "measure(total_points)",
+                      "expression": "MEASURE(`total_points`)"
+                    },
+                    {
+                      "name": "measure(avg_finish_position)",
+                      "expression": "MEASURE(`avg_finish_position`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "constructor_rank <= 20"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "`constructor_rank`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 20 Constructors",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "constructor_rank"
+                  },
+                  {
+                    "fieldName": "constructor_name"
+                  },
+                  {
+                    "fieldName": "measure(races)"
+                  },
+                  {
+                    "fieldName": "measure(race_wins)"
+                  },
+                  {
+                    "fieldName": "measure(podiums)"
+                  },
+                  {
+                    "fieldName": "measure(total_points)"
+                  },
+                  {
+                    "fieldName": "measure(avg_finish_position)"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column",
+                    "field": {
+                      "index": 0
+                    }
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "ca_points_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_constructors_mv",
+                  "fields": [
+                    {
+                      "name": "constructor_name",
+                      "expression": "`constructor_name`"
+                    },
+                    {
+                      "name": "measure(total_points)",
+                      "expression": "MEASURE(`total_points`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "constructor_rank <= 15"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`total_points`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 15 Constructors by Points",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "measure(total_points)"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_points)",
+                  "displayName": "total_points",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "constructor_name",
+                  "displayName": "constructor_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "circuit_analysis",
+      "displayName": "Circuit Analysis",
+      "layout": [
+        {
+          "widget": {
+            "name": "ci_races_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_circuits_mv",
+                  "fields": [
+                    {
+                      "name": "circuit_name",
+                      "expression": "`circuit_name`"
+                    },
+                    {
+                      "name": "measure(total_races)",
+                      "expression": "MEASURE(`total_races`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "circuit_rank <= 15"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`total_races`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 15 Circuits by Races Hosted",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "circuit_name",
+                  "displayName": "circuit_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "measure(total_races)"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_races)",
+                  "displayName": "total_races",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "circuit_name",
+                  "displayName": "circuit_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "ci_points_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_circuits_mv",
+                  "fields": [
+                    {
+                      "name": "circuit_name",
+                      "expression": "`circuit_name`"
+                    },
+                    {
+                      "name": "measure(total_points)",
+                      "expression": "MEASURE(`total_points`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "circuit_rank <= 15"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`total_points`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 15 Circuits by Points",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "circuit_name",
+                  "displayName": "circuit_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "measure(total_points)"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_points)",
+                  "displayName": "total_points",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "circuit_name",
+                  "displayName": "circuit_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "ci_circuits_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f1_circuits_mv",
+                  "fields": [
+                    {
+                      "name": "circuit_name",
+                      "expression": "`circuit_name`"
+                    },
+                    {
+                      "name": "measure(total_races)",
+                      "expression": "MEASURE(`total_races`)"
+                    },
+                    {
+                      "name": "measure(total_wins)",
+                      "expression": "MEASURE(`total_wins`)"
+                    },
+                    {
+                      "name": "measure(total_points)",
+                      "expression": "MEASURE(`total_points`)"
+                    },
+                    {
+                      "name": "measure(avg_finish_position)",
+                      "expression": "MEASURE(`avg_finish_position`)"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`total_races`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Circuit Overview",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "circuit_name"
+                  },
+                  {
+                    "fieldName": "measure(total_races)"
+                  },
+                  {
+                    "fieldName": "measure(total_wins)"
+                  },
+                  {
+                    "fieldName": "measure(total_points)"
+                  },
+                  {
+                    "fieldName": "measure(avg_finish_position)"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column-reversed",
+                    "field": {
+                      "index": 1
+                    }
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 12,
+            "height": 8
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "6109e6de",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "7c67a8fd",
+            "queries": [
+              {
+                "name": "dashboards/01f1c2df204a15b0b93f474968e15eb6/datasets/01f1c2df8bc61bb5912560cb14db4221_season",
+                "query": {
+                  "datasetName": "f1_seasons_mv",
+                  "fields": [
+                    {
+                      "name": "season",
+                      "expression": "`season`"
+                    },
+                    {
+                      "name": "season_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "season",
+                    "queryName": "dashboards/01f1c2df204a15b0b93f474968e15eb6/datasets/01f1c2df8bc61bb5912560cb14db4221_season"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
